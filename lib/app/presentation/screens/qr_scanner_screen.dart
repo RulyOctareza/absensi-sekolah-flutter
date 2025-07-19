@@ -1,3 +1,4 @@
+import 'dart:developer';
 import 'dart:io';
 import 'package:flutter/material.dart';
 import 'package:qr_code_scanner/qr_code_scanner.dart';
@@ -41,12 +42,11 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   }
 
   void _onQRViewCreated(QRViewController controller) {
+    log('[QRScannerScreen] QRView created');
     this.controller = controller;
     controller.scannedDataStream.listen((scanData) {
-      // Begitu dapat data, pause kamera dan kembali ke halaman sebelumnya
-      controller.pauseCamera();
-      // ignore: use_build_context_synchronously
-      Navigator.of(context).pop(scanData.code); // Kirim hasil scan kembali
+      log('[QRScannerScreen] Data hasil scan: \'${scanData.code}\'');
+      Navigator.pop(context, scanData.code);
     });
   }
 
