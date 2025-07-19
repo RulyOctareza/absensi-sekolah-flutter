@@ -1,0 +1,30 @@
+{
+  "project_info": {
+    "project_number": "350287245353",
+    "firebase_url": "https://aplikasi-absensi-sd-default-rtdb.asia-southeast1.firebasedatabase.app",
+    "project_id": "aplikasi-absensi-sd",
+    "storage_bucket": "aplikasi-absensi-sd.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:350287245353:android:f000ec4d00bb2745742c38",
+        "android_client_info": {
+          "package_name": "com.example.absensi_sekolah"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyC_NYLBxWn4yyeo7pJppTA67Vhb5odrbL8"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
