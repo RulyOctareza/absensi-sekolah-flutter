@@ -1,54 +1,50 @@
 import 'dart:convert';
-import 'dart:developer';
+
 import 'package:absensi_sekolah/app/utils/constants.dart';
-import 'package:dio/dio.dart';
+import 'package:dio/dio.dart'; // Impor paket dio
 
 class AttendanceService {
-  final Dio _dio = Dio();
+  final Dio _dio = Dio(); // Buat instance dari Dio
 
   Future<void> submitAttendance({
     required Map<String, dynamic> studentData,
     required String attendanceType, // "masuk" atau "pulang"
   }) async {
     try {
-      log(
-        '[AttendanceService] Mulai submitAttendance dengan data: studentData=$studentData, attendanceType=$attendanceType',
-      );
-      final data = {
-        'id_siswa': studentData['id_siswa'],
-        'nama_siswa': studentData['nama_lengkap'],
-        'kelas': studentData['kelas'].toString(),
-        'tipe_absen': attendanceType,
-      };
-      log(
-        '[AttendanceService] POST ke $webAppUrl dengan body: ${json.encode(data)}',
-      );
+      // Dio secara otomatis akan mengikuti redirect
       final response = await _dio.post(
         webAppUrl,
-        data: json.encode(data),
+        data: json.encode({
+          // kirim data dalam format string JSON
+          'id_siswa': studentData['id_siswa'],
+          'nama_siswa': studentData['nama_lengkap'],
+          'kelas': studentData['kelas'].toString(),
+          'tipe_absen': attendanceType,
+        }),
         options: Options(
           headers: {'Content-Type': 'application/json'},
           followRedirects: true,
+          // Anggap 302 sebagai status valid (berhasil), bukan error
           validateStatus: (status) => status != null && status < 500,
         ),
       );
-      log(
-        '[AttendanceService] Response status: \'${response.statusCode}\', body: \'${response.data}\'',
-      );
 
-      
-      final responseBody = response.data is String
-          ? json.decode(response.data)
-          : response.data;
-      log('[AttendanceService] Response decode: $responseBody');
-      if (responseBody['status'] != 'success') {
+      // Anggap 302 sebagai sukses jika memang server selalu redirect setelah record
+      if (response.statusCode == 302) {
+        // Optional: log atau handle khusus jika perlu
+        return;
+      }
+
+      final responseBody = response.data;
+      if (responseBody is Map && responseBody['status'] != 'success') {
         throw responseBody['message'] ?? 'Terjadi error yang tidak diketahui.';
       }
     } on DioException catch (e) {
-      log('[AttendanceService] Dio error: \'${e.message}\'');
+      // Menangkap error spesifik dari Dio untuk logging yang lebih baik
+      print('Dio error: ${e.message}');
       throw 'Gagal terhubung ke server. Periksa koneksi internet Anda.';
     } catch (e) {
-      log('[AttendanceService] ERROR: $e');
+      // Menangkap error lainnya
       throw 'Error saat mengirim absensi: $e';
     }
   }
