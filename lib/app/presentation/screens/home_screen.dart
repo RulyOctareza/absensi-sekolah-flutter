@@ -1,15 +1,20 @@
+import 'dart:convert';
 import 'dart:io';
+import 'dart:typed_data';
 
 import 'package:absensi_sekolah/app/data/services/attendance_service.dart';
 import 'package:absensi_sekolah/app/data/services/auth_service.dart';
 import 'package:absensi_sekolah/app/data/services/firebase_service.dart';
 import 'package:absensi_sekolah/app/presentation/screens/qr_scanner_screen.dart';
 import 'package:csv/csv.dart';
+import 'package:file_picker/file_picker.dart';
+import 'package:file_saver/file_saver.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_file_downloader/flutter_file_downloader.dart';
 import 'package:open_file/open_file.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:permission_handler/permission_handler.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -49,59 +54,40 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _downloadReport() async {
-    // Tampilkan loading indicator di UI
     setState(() => _isLoading = true);
-    _showSnackbar('Mempersiapkan laporan...', isError: false);
-
     try {
+      // 1. Ambil data absensi
       final now = DateTime.now();
       final date =
           "${now.year}-${now.month.toString().padLeft(2, '0')}-${now.day.toString().padLeft(2, '0')}";
-
-      // 1. Ambil data dari Firebase (sama seperti sebelumnya)
       final attendanceData = await _firebaseService.getDailyAttendance(date);
 
       if (attendanceData == null || attendanceData.isEmpty) {
         throw 'Tidak ada data absensi untuk hari ini.';
       }
 
-      // 2. Buat data CSV (sama seperti sebelumnya)
+      // 2. Buat data CSV
       List<List<dynamic>> rowsAsListOfValues = [];
-      rowsAsListOfValues.add(attendanceData.first.keys.toList()); // Headers
+      rowsAsListOfValues.add(attendanceData.first.keys.toList());
       for (var map in attendanceData) {
         rowsAsListOfValues.add(map.values.toList());
       }
       String csv = const ListToCsvConverter().convert(rowsAsListOfValues);
 
-      // 3. Simpan ke file temporer
-      final directory =
-          await getTemporaryDirectory(); // Gunakan direktori temporer
-      final tempFilePath = "${directory.path}/temp_absensi_$date.csv";
-      final tempFile = File(tempFilePath);
-      await tempFile.writeAsString(csv);
-
-      // Hentikan loading indicator di UI sebelum mulai download
-      setState(() => _isLoading = false);
-
-      // 4. "Unduh" file dari path temporer ke folder Downloads publik
-      FileDownloader.downloadFile(
-        url: tempFile.uri.toString(), // Gunakan URI dari file temporer
-        name:
-            "absensi_$date.csv", // Nama file yang akan muncul di folder Downloads
-        onProgress: (fileName, progress) {
-          // Anda bisa menampilkan progres di UI jika mau
-        },
-        onDownloadCompleted: (String path) {
-          _showSnackbar('Laporan berhasil diunduh!', isError: false);
-          OpenFile.open(path); // Buka file setelah selesai
-        },
-        onDownloadError: (String error) {
-          throw 'Gagal mengunduh file: $error';
-        },
+      // 3. Pilih lokasi simpan file (gunakan FileSaver, bukan FilePicker, dan gunakan bytes)
+      final Uint8List bytes = Uint8List.fromList(utf8.encode(csv));
+      final String filePath = await FileSaver.instance.saveFile(
+        name: 'absensi_$date',
+        bytes: bytes,
+        fileExtension: 'csv',
+        mimeType: MimeType.csv,
       );
+
+      _showSnackbar('Laporan berhasil disimpan di: $filePath', isError: false);
+      OpenFile.open(filePath);
     } catch (e) {
       _showSnackbar(e.toString(), isError: true);
-      // Pastikan loading indicator berhenti jika ada error
+    } finally {
       if (mounted) setState(() => _isLoading = false);
     }
   }
@@ -160,31 +146,6 @@ class _HomeScreenState extends State<HomeScreen> {
         backgroundColor: isError ? Colors.redAccent : Colors.green,
       ),
     );
-  }
-
-  void _downloadReportFromInternet(String url, String fileName) async {
-    setState(() => _isLoading = true);
-    _showSnackbar('Mengunduh laporan dari internet...', isError: false);
-    try {
-      await FileDownloader.downloadFile(
-        url: url,
-        name: fileName,
-        onProgress: (fileName, progress) {
-          // Bisa tambahkan indikator progres jika mau
-        },
-        onDownloadCompleted: (String path) {
-          _showSnackbar('Laporan berhasil diunduh di: $path', isError: false);
-          OpenFile.open(path); // Buka file setelah selesai
-        },
-        onDownloadError: (String error) {
-          _showSnackbar('Gagal mengunduh file: $error', isError: true);
-        },
-      );
-    } catch (e) {
-      _showSnackbar(e.toString(), isError: true);
-    } finally {
-      if (mounted) setState(() => _isLoading = false);
-    }
   }
 
   @override
