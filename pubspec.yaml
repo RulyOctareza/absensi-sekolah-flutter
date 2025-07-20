@@ -1,19 +1,25 @@
 name: absensi_sekolah
 description: "A new Flutter project."
-publish_to: 'none'
+publish_to: "none"
 version: 0.1.0
 
 environment:
   sdk: ^3.8.1
 
 dependencies:
+  csv: ^6.0.0
   dio: ^5.8.0+1
+  file_picker: ^10.2.0
   firebase_auth: ^5.6.2
   firebase_core: ^3.15.1
   firebase_database: ^11.3.9
   flutter:
     sdk: flutter
+  flutter_file_downloader: ^2.1.0
   http: ^1.4.0
+
+  open_file: ^3.5.10
+  path_provider: ^2.1.5
   qr_code_scanner: ^1.0.1
 
 dev_dependencies:

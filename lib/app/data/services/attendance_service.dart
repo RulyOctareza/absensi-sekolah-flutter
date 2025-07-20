@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:developer';
 
 import 'package:absensi_sekolah/app/utils/constants.dart';
 import 'package:dio/dio.dart'; // Impor paket dio
@@ -41,7 +42,7 @@ class AttendanceService {
       }
     } on DioException catch (e) {
       // Menangkap error spesifik dari Dio untuk logging yang lebih baik
-      print('Dio error: ${e.message}');
+      log('Dio error: ${e.message}');
       throw 'Gagal terhubung ke server. Periksa koneksi internet Anda.';
     } catch (e) {
       // Menangkap error lainnya
