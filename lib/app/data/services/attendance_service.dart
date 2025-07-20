@@ -30,7 +30,7 @@ class AttendanceService {
       );
 
       // Anggap 302 sebagai sukses jika memang server selalu redirect setelah record
-      if (response.statusCode == 302) {
+      if (response.statusCode == 302 || response.statusCode == 200) {
         // Optional: log atau handle khusus jika perlu
         return;
       }

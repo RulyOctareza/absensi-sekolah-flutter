@@ -8,6 +8,7 @@ environment:
 
 dependencies:
   dio: ^5.8.0+1
+  firebase_auth: ^5.6.2
   firebase_core: ^3.15.1
   firebase_database: ^11.3.9
   flutter:
