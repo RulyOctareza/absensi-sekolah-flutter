@@ -1,20 +1,16 @@
 import 'dart:convert';
-import 'dart:io';
 import 'dart:typed_data';
 
 import 'package:absensi_sekolah/app/data/services/attendance_service.dart';
 import 'package:absensi_sekolah/app/data/services/auth_service.dart';
 import 'package:absensi_sekolah/app/data/services/firebase_service.dart';
+import 'package:absensi_sekolah/app/data/services/notification_service.dart';
 import 'package:absensi_sekolah/app/presentation/screens/qr_scanner_screen.dart';
 import 'package:csv/csv.dart';
-import 'package:file_picker/file_picker.dart';
 import 'package:file_saver/file_saver.dart';
 import 'package:firebase_auth/firebase_auth.dart';
 import 'package:flutter/material.dart';
-import 'package:flutter_file_downloader/flutter_file_downloader.dart';
 import 'package:open_file/open_file.dart';
-import 'package:path_provider/path_provider.dart';
-import 'package:permission_handler/permission_handler.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -28,6 +24,7 @@ class _HomeScreenState extends State<HomeScreen> {
   final AttendanceService _attendanceService = AttendanceService();
   final AuthService _authService = AuthService();
   final User? currentUser = FirebaseAuth.instance.currentUser;
+  final NotificationService _notificationService = NotificationService();
 
   bool _isLoading = false;
   String? _teacherName;
@@ -132,6 +129,11 @@ class _HomeScreenState extends State<HomeScreen> {
       final successMessage =
           'Absen ${attendanceType == 'masuk' ? 'MASUK' : 'PULANG'} untuk ${studentData['nama_lengkap']} berhasil!';
       _showSnackbar(successMessage, isError: false);
+
+      _notificationService.sendWhatsappNotification(
+        studentData: studentData,
+        attendanceType: attendanceType,
+      );
     } catch (e) {
       _showSnackbar(e.toString(), isError: true);
     } finally {
