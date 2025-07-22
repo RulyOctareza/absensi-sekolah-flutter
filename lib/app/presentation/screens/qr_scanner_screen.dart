@@ -7,7 +7,8 @@ import 'package:absensi_sekolah/app/data/services/attendance_service.dart';
 import 'package:absensi_sekolah/app/data/services/notification_service.dart';
 
 class QRScannerScreen extends StatefulWidget {
-  const QRScannerScreen({super.key});
+  final String attendanceType;
+  const QRScannerScreen({super.key, required this.attendanceType});
 
   @override
   State<QRScannerScreen> createState() => _QRScannerScreenState();
@@ -36,7 +37,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
   Widget build(BuildContext context) {
     return Scaffold(
       appBar: AppBar(
-        title: const Text('Scan QR Siswa'),
+        title: Text('Scan QR ${widget.attendanceType}'),
         actions: [
           if (isProcessing)
             const Padding(
@@ -119,11 +120,11 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
             nama = studentData['nama_lengkap'] ?? id;
             await _attendanceService.submitAttendance(
               studentData: studentData,
-              attendanceType: 'masuk',
+              attendanceType: widget.attendanceType,
             );
             await _notificationService.sendWhatsappNotification(
               studentData: studentData,
-              attendanceType: 'masuk',
+              attendanceType: widget.attendanceType,
             );
             status = 'Berhasil';
           }

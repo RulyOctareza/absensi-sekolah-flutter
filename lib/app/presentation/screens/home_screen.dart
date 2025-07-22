@@ -100,7 +100,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
     final scannedId = await Navigator.push<String?>(
       context,
-      MaterialPageRoute(builder: (context) => const QRScannerScreen()),
+      MaterialPageRoute(
+        builder: (context) => QRScannerScreen(attendanceType: attendanceType),
+      ),
     );
 
     if (scannedId == null) return;
