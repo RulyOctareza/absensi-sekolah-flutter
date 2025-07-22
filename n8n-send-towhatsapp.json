@@ -1,0 +1,127 @@
+{
+  "nodes": [
+    {
+      "parameters": {
+        "httpMethod": "POST",
+        "path": "3dab168c-3df6-4148-aa82-f2217778c386",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.webhook",
+      "typeVersion": 2,
+      "position": [-160, 0],
+      "id": "b5d64cca-a9d4-4ef8-b77c-c30901c02c6a",
+      "name": "Webhook",
+      "webhookId": "3dab168c-3df6-4148-aa82-f2217778c386"
+    },
+    {
+      "parameters": {
+        "method": "POST",
+        "url": "https://waha.rulyoctareza.tech/api/sendText",
+        "sendBody": true,
+        "specifyBody": "json",
+        "jsonBody": "={\n  \"session\": \"default\",\n  \"chatId\": \"{{$('Wait').item.json.body.nomor_whatsapp}}@c.us\",\n  \"text\": \"{{ $('Basic LLM Chain').item.json.response.text }}\"\n}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequest",
+      "typeVersion": 4.2,
+      "position": [700, 0],
+      "id": "69297875-3f13-450d-a39b-b8ccc1947ca1",
+      "name": "HTTP Request"
+    },
+    {
+      "parameters": {
+        "amount": "={{Math.floor(Math.random()*26 ) +5  }}"
+      },
+      "type": "n8n-nodes-base.wait",
+      "typeVersion": 1.1,
+      "position": [120, 0],
+      "id": "4ad6b9d6-feb1-471f-8eb3-563a2d09ad80",
+      "name": "Wait",
+      "webhookId": "0bbe8666-bd6e-4dd8-be34-2aa9a8504b6a",
+      "notesInFlow": false,
+      "retryOnFail": false,
+      "executeOnce": false,
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "=Anda adalah asisten sistem absensi untuk sebuah Sekolah Dasar.\n\nTugas Anda adalah membuat sebuah pesan notifikasi WhatsApp yang singkat, sopan, dan ramah untuk orang tua murid berdasarkan data yang diberikan.\n\nGunakan variasi kalimat yang berbeda-beda dan sapaan yang sesuai (Pagi, Siang, Sore) agar tidak terdengar seperti robot. Sertakan juga satu kalimat penutup yang positif atau mendoakan.\n\nData Absensi:\n- Nama Siswa: {{ $json.body.nama_siswa }}\n- Tipe Absen: {{ $json.body.tipe_absen }}\n- Waktu: {{ $json.body.waktu }}\n\nBuat pesan notifikasinya sekarang seperti template yang aku berikan, langsung pada pesan nya. Tulis dengan kalimat tanpa enter.",
+        "hasOutputParser": true
+      },
+      "type": "@n8n/n8n-nodes-langchain.chainLlm",
+      "typeVersion": 1.5,
+      "position": [340, 0],
+      "id": "06288ad8-c9cf-41b8-8e60-594ba3c6055b",
+      "name": "Basic LLM Chain"
+    },
+    {
+      "parameters": {
+        "modelName": "models/gemini-1.5-flash",
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatGoogleGemini",
+      "typeVersion": 1,
+      "position": [360, 180],
+      "id": "c77dbd82-f082-46e0-b28b-b54c6b7cd482",
+      "name": "Google Gemini Chat Model",
+      "credentials": {
+        "googlePalmApi": {
+          "id": "KE4wQVBSoXpi0ymY",
+          "name": "Google Gemini(PaLM) Api account"
+        }
+      }
+    }
+  ],
+  "connections": {
+    "Webhook": {
+      "main": [
+        [
+          {
+            "node": "Wait",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Wait": {
+      "main": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Basic LLM Chain": {
+      "main": [
+        [
+          {
+            "node": "HTTP Request",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Google Gemini Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "Basic LLM Chain",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "pinData": {},
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "aa603cd56d369be7d6663f85bf32670d09b91f5c209e621db29640ead6079d39"
+  }
+}
