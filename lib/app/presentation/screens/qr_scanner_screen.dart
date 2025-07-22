@@ -88,8 +88,9 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                     isSuccess ? Icons.check_circle : Icons.error,
                     color: isSuccess ? Colors.green : Colors.red,
                   ),
-                  title: Text(result['id'] ?? '-'),
+                  title: Text(result['nama'] ?? result['id'] ?? '-'),
                   subtitle: Text(result['status'] ?? ''),
+                  trailing: result['id'] != null ? Text(result['id']!) : null,
                 );
               },
             ),
@@ -109,17 +110,17 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           isProcessing = true;
         });
         String status = '';
+        String? nama;
         try {
           final studentData = await _firebaseService.getStudentById(id);
           if (studentData == null) {
             status = 'Gagal: Siswa tidak ditemukan';
           } else {
-            // Proses absensi (default: masuk)
+            nama = studentData['nama_lengkap'] ?? id;
             await _attendanceService.submitAttendance(
               studentData: studentData,
               attendanceType: 'masuk',
             );
-            // Kirim notifikasi WA (optional, bisa di-comment jika tidak ingin spam)
             await _notificationService.sendWhatsappNotification(
               studentData: studentData,
               attendanceType: 'masuk',
@@ -130,7 +131,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
           status = 'Gagal: ${e.toString()}';
         }
         setState(() {
-          scanResults.add({'id': id, 'status': status});
+          scanResults.add({'id': id, 'nama': nama ?? id, 'status': status});
           isProcessing = false;
         });
         await controller.pauseCamera();
