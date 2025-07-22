@@ -46,7 +46,7 @@ class _QRScannerScreenState extends State<QRScannerScreen> {
                 height: 24,
                 child: CircularProgressIndicator(
                   strokeWidth: 2,
-                  color: Colors.white,
+                  color: Colors.purple,
                 ),
               ),
             )
