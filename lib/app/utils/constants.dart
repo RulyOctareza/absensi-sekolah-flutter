@@ -5,4 +5,4 @@ const String firebaseDatabaseUrl =
     'https://absensi-sekolah-2b8f0-default-rtdb.firebaseio.com/';
 
 const String n8nWebHookUrl =
-    'https://n8n.rulyoctareza.tech/webhook/898e8090-3064-4bf3-b3e1-d633b571b72a';
+    'https://n8n.rulyoctareza.tech/webhook/3dab168c-3df6-4148-aa82-f2217778c386';
